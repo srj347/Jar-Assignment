@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -65,11 +66,6 @@ fun ItemListScreen(
     navController: NavHostController
 ) {
     val items by viewModel.listStringData.collectAsState()
-    var computerItems by remember { mutableStateOf(items) }
-
-    LaunchedEffect(items) {
-        computerItems = items
-    }
 
     if (navigate.value.isNotBlank()) {
         val currRoute = navController.currentDestination?.route.orEmpty()
@@ -79,11 +75,12 @@ fun ItemListScreen(
     }
 
     SearchItems(
-        computerItems,
+        items,
         onNavigateToDetail
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchItems(
     items: List<ComputerItem>,
@@ -92,7 +89,7 @@ fun SearchItems(
     var searchQuery by remember { mutableStateOf("") }
     var filteredItems by remember { mutableStateOf(items) }
 
-    LaunchedEffect(searchQuery) {
+    LaunchedEffect(searchQuery, items) {
         filteredItems = if (searchQuery.isEmpty()) {
             items
         } else {
@@ -111,10 +108,13 @@ fun SearchItems(
             onValueChange = { searchQuery = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(16.dp)
                 .padding(8.dp),
             textStyle = TextStyle(color = Color.Black),
-            colors = TextFieldDefaults.colors(focusedTextColor = Color.Black)
+            colors = TextFieldDefaults.textFieldColors(
+                focusedTextColor = Color.Black,
+                focusedIndicatorColor = Color.Gray,
+                unfocusedIndicatorColor = Color.LightGray
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
 
