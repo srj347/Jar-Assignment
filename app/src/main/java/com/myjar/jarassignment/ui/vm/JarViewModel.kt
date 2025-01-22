@@ -1,5 +1,6 @@
 package com.myjar.jarassignment.ui.vm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myjar.jarassignment.createRetrofit
@@ -20,7 +21,23 @@ class JarViewModel : ViewModel() {
 
     fun fetchData() {
         viewModelScope.launch {
-            repository.fetchResults()
+            // Setting the response to uistate
+            try{
+                val response = repository.fetchResults()
+                response.collect {
+                    try {
+                        _listStringData.value = it
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error collecting the response: ${e.message}")
+                    }
+                }
+            } catch (e: Exception){
+                Log.e(TAG, "Error fetching the response: ${e.message}")
+            }
         }
+    }
+
+    companion object {
+        val TAG = JarViewModel::class.simpleName
     }
 }
